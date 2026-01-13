@@ -14,8 +14,6 @@ class TodosRepository {
   Future<List<Todo>> getFilteredTodos(String filterName) async =>
       await _todoApiClient.getFilteredTodos(filterName);
 
-  Future<void> saveTodo(Todo todo) async => await _todoApiClient.addTodo(todo);
-
   Future<Todo> createTodo(String title) async {
     final todo = Todo(
       id: Random().nextInt(1000) + 400,
@@ -27,6 +25,16 @@ class TodosRepository {
 
   Future<Todo> updateTodo(Todo todo) async =>
       await _todoApiClient.updateTodo(todo);
+
+  Future<Todo> updateTodoCompletion({
+    required int id,
+    required bool completed,
+  }) async {
+    return await _todoApiClient.updateTodoCompletion(
+      id: id,
+      completed: completed,
+    );
+  }
 
   Future<void> deleteTodo(int todoId) async =>
       await _todoApiClient.deleteTodo(todoId);

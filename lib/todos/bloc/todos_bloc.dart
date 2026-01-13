@@ -17,6 +17,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
     on<TodosOverviewTodosFilterChanged>(_onFilterChanged);
     on<TodosOverviewTodoDeleted>(_onTodoDeleted);
     on<TodosOverviewTodoAddedRequested>(_onTodoAddedRequested);
+    on<TodosOverviewTodoCompletionToggled>(_onTodoCompletionToggled);
     // on<TodosOverviewTodosSearchChanged>(_onSearchChanged);
   }
 
@@ -82,11 +83,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       ..removeWhere((todo) => todo.id == event.todo.id);
     visibleTodos = updatedTodos;
     emit(
-      TodosOverviewLoaded(
-        todos: updatedTodos,
-        filter: currentState.filter,
-        searchQuery: currentState.searchQuery,
-      ),
+      currentState.copyWith(todos: updatedTodos),
     );
 
     try {
@@ -106,11 +103,9 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
     }
 
     emit(
-      TodosOverviewLoaded(
-        todos: currentState.todos,
-        filter: currentState.filter,
-        searchQuery: currentState.searchQuery,
+      currentState.copyWith(
         actionStatus: TodosOverviewActionStatus.addInProgress,
+        actionError: null,
       ),
     );
 
@@ -120,21 +115,88 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
         ..insert(0, createdTodo);
       visibleTodos = updatedTodos;
       emit(
-        TodosOverviewLoaded(
+        currentState.copyWith(
           todos: updatedTodos,
-          filter: currentState.filter,
-          searchQuery: currentState.searchQuery,
           actionStatus: TodosOverviewActionStatus.addSuccess,
+          actionError: null,
         ),
       );
     } catch (e) {
       emit(
-        TodosOverviewLoaded(
-          todos: currentState.todos,
-          filter: currentState.filter,
-          searchQuery: currentState.searchQuery,
+        currentState.copyWith(
           actionStatus: TodosOverviewActionStatus.addFailure,
           actionError: e.toString(),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onTodoCompletionToggled(
+    TodosOverviewTodoCompletionToggled event,
+    Emitter<TodosOverviewState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! TodosOverviewLoaded) {
+      return;
+    }
+
+    final updatedTodos = currentState.todos
+        .map(
+          (todo) => todo.id == event.todo.id
+              ? Todo(
+                  id: todo.id,
+                  title: todo.title,
+                  completed: event.completed,
+                )
+              : todo,
+        )
+        .toList();
+    final updatingIds = Set<int>.from(currentState.updatingTodoIds)
+      ..add(event.todo.id);
+    visibleTodos = updatedTodos;
+    emit(
+      currentState.copyWith(
+        todos: updatedTodos,
+        updatingTodoIds: updatingIds,
+      ),
+    );
+
+    try {
+      final patchedTodo = await _todosRepository.updateTodoCompletion(
+        id: event.todo.id,
+        completed: event.completed,
+      );
+      final finalizedTodos = updatedTodos
+          .map((todo) => todo.id == patchedTodo.id ? patchedTodo : todo)
+          .toList();
+      final updatedIds = Set<int>.from(updatingIds)..remove(event.todo.id);
+      visibleTodos = finalizedTodos;
+      emit(
+        currentState.copyWith(
+          todos: finalizedTodos,
+          updatingTodoIds: updatedIds,
+          completionError: null,
+        ),
+      );
+    } catch (e) {
+      final revertedTodos = updatedTodos
+          .map(
+            (todo) => todo.id == event.todo.id
+                ? Todo(
+                    id: todo.id,
+                    title: todo.title,
+                    completed: !event.completed,
+                  )
+                : todo,
+          )
+          .toList();
+      final updatedIds = Set<int>.from(updatingIds)..remove(event.todo.id);
+      visibleTodos = revertedTodos;
+      emit(
+        currentState.copyWith(
+          todos: revertedTodos,
+          updatingTodoIds: updatedIds,
+          completionError: e.toString(),
         ),
       );
     }

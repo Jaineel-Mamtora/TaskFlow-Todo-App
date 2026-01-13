@@ -46,3 +46,16 @@ final class TodosOverviewTodoAddedRequested extends TodosOverviewEvent {
   @override
   List<Object> get props => [title];
 }
+
+final class TodosOverviewTodoCompletionToggled extends TodosOverviewEvent {
+  const TodosOverviewTodoCompletionToggled({
+    required this.todo,
+    required this.completed,
+  });
+
+  final Todo todo;
+  final bool completed;
+
+  @override
+  List<Object> get props => [todo, completed];
+}

@@ -16,6 +16,13 @@ class TodoDismissibleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isUpdating = context.select((TodosOverviewBloc bloc) {
+      final state = bloc.state;
+      if (state is TodosOverviewLoaded) {
+        return state.updatingTodoIds.contains(todo.id);
+      }
+      return false;
+    });
 
     return Dismissible(
       key: ValueKey(todo.id),
@@ -23,12 +30,12 @@ class TodoDismissibleTile extends StatelessWidget {
       background: _buildDismissBackground(
         context,
         alignment: Alignment.centerLeft,
-        icon: Icons.delete_outline,
+        icon: Icons.delete_outline_rounded,
       ),
       secondaryBackground: _buildDismissBackground(
         context,
         alignment: Alignment.centerRight,
-        icon: Icons.delete_outline,
+        icon: Icons.delete_outline_rounded,
       ),
       confirmDismiss: (direction) async {
         return showDialog<bool>(
@@ -65,11 +72,34 @@ class TodoDismissibleTile extends StatelessWidget {
         context.read<TodosOverviewBloc>().add(
           TodosOverviewTodoDeleted(todo),
         );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Task deleted')),
+        );
       },
       child: CheckboxListTile(
         value: todo.completed,
-        onChanged: (value) {},
-        title: Text(todo.title),
+        onChanged: isUpdating
+            ? null
+            : (value) {
+                if (value == null) {
+                  return;
+                }
+                context.read<TodosOverviewBloc>().add(
+                  TodosOverviewTodoCompletionToggled(
+                    todo: todo,
+                    completed: value,
+                  ),
+                );
+              },
+        title: Text(
+          todo.title,
+          style: TextStyle(
+            color: todo.completed
+                ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
+                : theme.colorScheme.onSurface,
+          ),
+        ),
+        controlAffinity: ListTileControlAffinity.leading,
         tileColor: theme.colorScheme.surfaceContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
