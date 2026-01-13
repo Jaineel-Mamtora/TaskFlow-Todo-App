@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todos_repository/todos_repository.dart';
 
 import 'package:taskflow_todo_app/todos/bloc/todos_bloc.dart';
+import 'package:taskflow_todo_app/todos/views/no_search_result_placeholder.dart';
 import 'package:taskflow_todo_app/todos/views/todo_filter_chip_list.dart';
 import 'package:taskflow_todo_app/todos/views/todo_search_field.dart';
 import 'package:taskflow_todo_app/todos/views/todo_sliver_list.dart';
@@ -75,8 +77,36 @@ class TodoOverviewView extends StatelessWidget {
                       ),
                     )
                   else
-                    TodoSliverList(
-                      todos: (state as TodosOverviewLoaded).todos,
+                    BlocSelector<
+                      TodosOverviewBloc,
+                      TodosOverviewState,
+                      List<Todo>
+                    >(
+                      selector: (state) {
+                        return state is TodosOverviewLoaded
+                            ? state.visibleTodos
+                            : const <Todo>[];
+                      },
+                      builder: (context, visibleTodos) {
+                        if (visibleTodos.isEmpty) {
+                          final query = context.select(
+                            (TodosOverviewBloc bloc) {
+                              final blocState = bloc.state;
+                              return blocState is TodosOverviewLoaded
+                                  ? blocState.searchQuery
+                                  : '';
+                            },
+                          );
+                          return SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: NoSearchResultPlaceholder(query: query),
+                          );
+                        }
+
+                        return TodoSliverList(
+                          todos: visibleTodos,
+                        );
+                      },
                     ),
 
                   const SliverToBoxAdapter(

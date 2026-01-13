@@ -15,16 +15,14 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       super(const TodosOverviewInitial()) {
     on<TodosOverviewRequested>(_onRequested);
     on<TodosOverviewTodosFilterChanged>(_onFilterChanged);
+    on<TodosOverviewSearchQueryChanged>(_onSearchQueryChanged);
     on<TodosOverviewTodoDeleted>(_onTodoDeleted);
     on<TodosOverviewTodoAddedRequested>(_onTodoAddedRequested);
     on<TodosOverviewTodoUpdatedRequested>(_onTodoUpdatedRequested);
     on<TodosOverviewTodoCompletionToggled>(_onTodoCompletionToggled);
-    // on<TodosOverviewTodosSearchChanged>(_onSearchChanged);
   }
 
   final TodosRepository _todosRepository;
-
-  List<Todo>? visibleTodos;
 
   Future<void> _onRequested(
     TodosOverviewRequested event,
@@ -34,7 +32,6 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
 
     try {
       final todos = await _todosRepository.getTodos();
-      visibleTodos = todos;
       emit(
         TodosOverviewLoaded(
           todos: todos,
@@ -51,24 +48,32 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
     TodosOverviewTodosFilterChanged event,
     Emitter<TodosOverviewState> emit,
   ) async {
-    emit(const TodosOverviewListLoading());
-
-    try {
-      final filteredTodos = await _todosRepository.getFilteredTodos(
-        event.filter.name.toLowerCase(),
-      );
-      visibleTodos = filteredTodos;
-      emit(
-        TodosOverviewLoaded(
-          todos: filteredTodos,
-          filter: event.filter,
-          searchQuery: '',
-        ),
-      );
-    } catch (e) {
-      print(e.toString());
-      emit(TodosOverviewFailure(e.toString()));
+    final currentState = state;
+    if (currentState is! TodosOverviewLoaded) {
+      return;
     }
+
+    emit(
+      currentState.copyWith(
+        filter: event.filter,
+      ),
+    );
+  }
+
+  void _onSearchQueryChanged(
+    TodosOverviewSearchQueryChanged event,
+    Emitter<TodosOverviewState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is! TodosOverviewLoaded) {
+      return;
+    }
+
+    emit(
+      currentState.copyWith(
+        searchQuery: event.query,
+      ),
+    );
   }
 
   Future<void> _onTodoDeleted(
@@ -82,7 +87,6 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
 
     final updatedTodos = List<Todo>.from(currentState.todos)
       ..removeWhere((todo) => todo.id == event.todo.id);
-    visibleTodos = updatedTodos;
     emit(
       currentState.copyWith(todos: updatedTodos),
     );
@@ -115,7 +119,6 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       final createdTodo = await _todosRepository.createTodo(event.title);
       final updatedTodos = List<Todo>.from(currentState.todos)
         ..insert(0, createdTodo);
-      visibleTodos = updatedTodos;
       emit(
         currentState.copyWith(
           todos: updatedTodos,
@@ -160,7 +163,6 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       final finalizedTodos = currentState.todos
           .map((todo) => todo.id == patchedTodo.id ? patchedTodo : todo)
           .toList();
-      visibleTodos = finalizedTodos;
       emit(
         currentState.copyWith(
           todos: finalizedTodos,
@@ -206,7 +208,6 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
           .map((todo) => todo.id == patchedTodo.id ? patchedTodo : todo)
           .toList();
       final updatedIds = Set<int>.from(updatingIds)..remove(event.todo.id);
-      visibleTodos = finalizedTodos;
       emit(
         currentState.copyWith(
           todos: finalizedTodos,

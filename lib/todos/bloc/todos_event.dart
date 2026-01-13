@@ -20,8 +20,8 @@ final class TodosOverviewTodosFilterChanged extends TodosOverviewEvent {
   List<Object> get props => [filter];
 }
 
-final class TodosOverviewTodosSearchChanged extends TodosOverviewEvent {
-  const TodosOverviewTodosSearchChanged(this.query);
+final class TodosOverviewSearchQueryChanged extends TodosOverviewEvent {
+  const TodosOverviewSearchQueryChanged(this.query);
 
   final String query;
 

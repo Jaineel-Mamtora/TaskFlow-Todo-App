@@ -52,6 +52,30 @@ final class TodosOverviewLoaded extends TodosOverviewState {
   final Set<int> updatingTodoIds;
   final String? completionError;
 
+  List<Todo> get visibleTodos {
+    Iterable<Todo> filtered = todos;
+
+    switch (filter) {
+      case TodoFilter.active:
+        filtered = filtered.where((todo) => !todo.completed);
+        break;
+      case TodoFilter.completed:
+        filtered = filtered.where((todo) => todo.completed);
+        break;
+      case TodoFilter.all:
+        break;
+    }
+
+    final query = searchQuery.trim().toLowerCase();
+    if (query.isEmpty) {
+      return filtered.toList();
+    }
+
+    return filtered
+        .where((todo) => todo.title.toLowerCase().contains(query))
+        .toList();
+  }
+
   TodosOverviewLoaded copyWith({
     List<Todo>? todos,
     TodoFilter? filter,
