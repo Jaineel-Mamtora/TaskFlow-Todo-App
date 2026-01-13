@@ -101,7 +101,7 @@ class _AddTodoBottomSheetState extends State<AddTodoBottomSheet> {
       }
       switch (state.actionStatus) {
         case TodosOverviewActionStatus.updateSuccess:
-          Navigator.of(context).pop(true);
+          _safePop();
           break;
         case TodosOverviewActionStatus.updateFailure:
           setState(() {
@@ -125,7 +125,7 @@ class _AddTodoBottomSheetState extends State<AddTodoBottomSheet> {
 
     switch (state.actionStatus) {
       case TodosOverviewActionStatus.addSuccess:
-        Navigator.of(context).pop(true);
+        _safePop();
         break;
       case TodosOverviewActionStatus.addFailure:
         setState(() {
@@ -143,6 +143,13 @@ class _AddTodoBottomSheetState extends State<AddTodoBottomSheet> {
       case TodosOverviewActionStatus.updateSuccess:
       case TodosOverviewActionStatus.updateFailure:
         break;
+    }
+  }
+
+  void _safePop() {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop(true);
     }
   }
 

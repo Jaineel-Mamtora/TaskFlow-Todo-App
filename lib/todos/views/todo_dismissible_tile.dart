@@ -102,11 +102,25 @@ class TodoDismissibleTile extends StatelessWidget {
                 : theme.colorScheme.onSurface,
           ),
         ),
-        secondary: IconButton(
-          icon: const Icon(Icons.edit_outlined),
-          onPressed: () {
-            showAddTodoBottomSheet(context, todo: todo);
-          },
+        secondary: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (todo.pendingSync)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  Icons.cloud_upload_outlined,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () {
+                showAddTodoBottomSheet(context, todo: todo);
+              },
+            ),
+          ],
         ),
         controlAffinity: ListTileControlAffinity.leading,
         tileColor: theme.colorScheme.surfaceContainer,

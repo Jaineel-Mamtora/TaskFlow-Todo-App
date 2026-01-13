@@ -39,6 +39,9 @@ final class TodosOverviewLoaded extends TodosOverviewState {
     this.actionTodoId,
     this.updatingTodoIds = const <int>{},
     this.completionError,
+    this.infoMessage,
+    this.isOffline = false,
+    this.syncStatus = SyncStatus.idle,
   });
 
   static const _sentinel = Object();
@@ -51,6 +54,9 @@ final class TodosOverviewLoaded extends TodosOverviewState {
   final int? actionTodoId;
   final Set<int> updatingTodoIds;
   final String? completionError;
+  final String? infoMessage;
+  final bool isOffline;
+  final SyncStatus syncStatus;
 
   List<Todo> get visibleTodos {
     Iterable<Todo> filtered = todos;
@@ -85,6 +91,9 @@ final class TodosOverviewLoaded extends TodosOverviewState {
     Object? actionTodoId = _sentinel,
     Set<int>? updatingTodoIds,
     Object? completionError = _sentinel,
+    Object? infoMessage = _sentinel,
+    bool? isOffline,
+    SyncStatus? syncStatus,
   }) {
     return TodosOverviewLoaded(
       todos: todos ?? this.todos,
@@ -101,6 +110,11 @@ final class TodosOverviewLoaded extends TodosOverviewState {
       completionError: completionError == _sentinel
           ? this.completionError
           : completionError as String?,
+      infoMessage: infoMessage == _sentinel
+          ? this.infoMessage
+          : infoMessage as String?,
+      isOffline: isOffline ?? this.isOffline,
+      syncStatus: syncStatus ?? this.syncStatus,
     );
   }
 
@@ -114,6 +128,9 @@ final class TodosOverviewLoaded extends TodosOverviewState {
     actionTodoId,
     updatingTodoIds,
     completionError,
+    infoMessage,
+    isOffline,
+    syncStatus,
   ];
 }
 

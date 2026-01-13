@@ -18,15 +18,26 @@ class TodosPage extends StatelessWidget {
   }
 }
 
-class TodoOverviewView extends StatelessWidget {
+class TodoOverviewView extends StatefulWidget {
   const TodoOverviewView({super.key});
+
+  @override
+  State<TodoOverviewView> createState() => _TodoOverviewViewState();
+}
+
+class _TodoOverviewViewState extends State<TodoOverviewView> {
+  SyncStatus? _lastSyncStatus;
+  bool _shouldAnnounceSync = false;
+  bool? _lastIsOffline;
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<TodosOverviewBloc, TodosOverviewState>(
       listenWhen: (previous, current) {
         if (previous is TodosOverviewLoaded && current is TodosOverviewLoaded) {
-          return previous.completionError != current.completionError;
+          return previous.completionError != current.completionError ||
+              previous.infoMessage != current.infoMessage ||
+              previous.syncStatus != current.syncStatus;
         }
         return false;
       },
@@ -37,6 +48,40 @@ class TodoOverviewView extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.completionError!)),
           );
+        }
+        if (state is TodosOverviewLoaded &&
+            state.infoMessage != null &&
+            state.infoMessage!.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.infoMessage!)),
+          );
+        }
+        if (state is TodosOverviewLoaded) {
+          if (_lastIsOffline == true && !state.isOffline) {
+            _shouldAnnounceSync = true;
+          }
+          _lastIsOffline = state.isOffline;
+          if (_lastSyncStatus != state.syncStatus) {
+            if (_shouldAnnounceSync && state.syncStatus == SyncStatus.syncing) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Syncing tasks...')),
+              );
+            } else if (_shouldAnnounceSync &&
+                _lastSyncStatus == SyncStatus.syncing &&
+                state.syncStatus == SyncStatus.idle) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sync complete.')),
+              );
+              _shouldAnnounceSync = false;
+            } else if (_shouldAnnounceSync &&
+                state.syncStatus == SyncStatus.failed) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sync failed.')),
+              );
+              _shouldAnnounceSync = false;
+            }
+          }
+          _lastSyncStatus = state.syncStatus;
         }
       },
       child: BlocBuilder<TodosOverviewBloc, TodosOverviewState>(
@@ -53,6 +98,11 @@ class TodoOverviewView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: CustomScrollView(
                 slivers: [
+                  if (state is TodosOverviewLoaded && state.isOffline)
+                    const SliverToBoxAdapter(
+                      child: _OfflineBanner(),
+                    ),
+
                   const SliverToBoxAdapter(
                     child: TodoSearchField(),
                   ),
@@ -123,6 +173,38 @@ class TodoOverviewView extends StatelessWidget {
           }
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+}
+
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.cloud_off_rounded,
+            color: theme.colorScheme.onTertiaryContainer,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Offline — will sync later',
+              style: TextStyle(color: theme.colorScheme.onTertiaryContainer),
+            ),
+          ),
+        ],
       ),
     );
   }

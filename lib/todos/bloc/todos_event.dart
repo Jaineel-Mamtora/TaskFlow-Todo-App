@@ -72,3 +72,43 @@ final class TodosOverviewTodoCompletionToggled extends TodosOverviewEvent {
   @override
   List<Object> get props => [todo, completed];
 }
+
+final class _TodosOverviewTodosUpdated extends TodosOverviewEvent {
+  const _TodosOverviewTodosUpdated(this.todos);
+
+  final List<Todo> todos;
+
+  @override
+  List<Object> get props => [todos];
+}
+
+final class _TodosOverviewConnectivityChanged extends TodosOverviewEvent {
+  const _TodosOverviewConnectivityChanged(this.isOnline);
+
+  final bool isOnline;
+
+  @override
+  List<Object> get props => [isOnline];
+}
+
+final class _TodosOverviewSyncStatusChanged extends TodosOverviewEvent {
+  const _TodosOverviewSyncStatusChanged(this.status);
+
+  final SyncStatus status;
+
+  @override
+  List<Object> get props => [status];
+}
+
+final class _TodosOverviewRefreshFailed extends TodosOverviewEvent {
+  const _TodosOverviewRefreshFailed(this.message);
+
+  final String message;
+
+  @override
+  List<Object> get props => [message];
+}
+
+final class _TodosOverviewInitialRefreshFinished extends TodosOverviewEvent {
+  const _TodosOverviewInitialRefreshFinished();
+}
