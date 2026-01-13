@@ -15,7 +15,12 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
+  http: ^1.6.0
   intl: ^0.20.2
+  todo_api:
+    path: packages/todo_api
+  todos_repository:
+    path: packages/todos_repository
 
 dev_dependencies:
   flutter_test:
