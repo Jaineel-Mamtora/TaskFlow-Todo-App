@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:todo_api/todo_api.dart';
 
 class TodosRepository {
@@ -13,6 +15,15 @@ class TodosRepository {
       await _todoApiClient.getFilteredTodos(filterName);
 
   Future<void> saveTodo(Todo todo) async => await _todoApiClient.addTodo(todo);
+
+  Future<Todo> createTodo(String title) async {
+    final todo = Todo(
+      id: Random().nextInt(1000) + 400,
+      title: title,
+      completed: false,
+    );
+    return await _todoApiClient.addTodo(todo);
+  }
 
   Future<Todo> updateTodo(Todo todo) async =>
       await _todoApiClient.updateTodo(todo);

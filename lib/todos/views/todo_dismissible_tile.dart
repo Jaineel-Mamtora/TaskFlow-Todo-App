@@ -66,7 +66,9 @@ class TodoDismissibleTile extends StatelessWidget {
           TodosOverviewTodoDeleted(todo),
         );
       },
-      child: ListTile(
+      child: CheckboxListTile(
+        value: todo.completed,
+        onChanged: (value) {},
         title: Text(todo.title),
         tileColor: theme.colorScheme.surfaceContainer,
         shape: RoundedRectangleBorder(

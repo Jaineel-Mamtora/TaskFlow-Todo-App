@@ -78,11 +78,11 @@ class JsonPlaceholderApiClient {
   Future<Todo> addTodo(Todo todo) async {
     final todosResponse = await _httpClient.post(
       getTodosRequest(),
-      body: todo.toJson(),
+      body: jsonEncode(todo),
       headers: {'Content-type': 'application/json'},
     );
 
-    if (todosResponse.statusCode != 200) {
+    if (todosResponse.statusCode != 201) {
       throw const TodosRequestFailure(
         'Server is down. Please try after sometime.',
       );

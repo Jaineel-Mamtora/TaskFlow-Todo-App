@@ -1,10 +1,12 @@
 part of 'todos_bloc.dart';
 
+enum TodosOverviewActionStatus { idle, addInProgress, addSuccess, addFailure }
+
 sealed class TodosOverviewState extends Equatable {
   const TodosOverviewState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 final class TodosOverviewInitial extends TodosOverviewState {
@@ -24,14 +26,24 @@ final class TodosOverviewLoaded extends TodosOverviewState {
     required this.todos,
     this.filter = TodoFilter.all,
     this.searchQuery = '',
+    this.actionStatus = TodosOverviewActionStatus.idle,
+    this.actionError,
   });
 
   final List<Todo> todos;
   final TodoFilter filter;
   final String searchQuery;
+  final TodosOverviewActionStatus actionStatus;
+  final String? actionError;
 
   @override
-  List<Object> get props => [todos, filter, searchQuery];
+  List<Object?> get props => [
+    todos,
+    filter,
+    searchQuery,
+    actionStatus,
+    actionError,
+  ];
 }
 
 final class TodosOverviewFailure extends TodosOverviewState {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:taskflow_todo_app/todos/bloc/todos_bloc.dart';
 import 'package:todos_repository/todos_repository.dart';
 
 import 'package:taskflow_todo_app/home/views/home_page.dart';
@@ -30,11 +31,16 @@ class AppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: MaterialApp(
-        title: 'TaskFlow - Todo App',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.theme(),
-        home: const HomePage(),
+      child: BlocProvider(
+        create: (context) => TodosOverviewBloc(
+          todoRepository: context.read<TodosRepository>(),
+        )..add(const TodosOverviewRequested()),
+        child: MaterialApp(
+          title: 'TaskFlow - Todo App',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.theme(),
+          home: const HomePage(),
+        ),
       ),
     );
   }

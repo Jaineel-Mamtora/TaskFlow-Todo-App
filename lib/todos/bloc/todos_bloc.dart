@@ -16,6 +16,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
     on<TodosOverviewRequested>(_onRequested);
     on<TodosOverviewTodosFilterChanged>(_onFilterChanged);
     on<TodosOverviewTodoDeleted>(_onTodoDeleted);
+    on<TodosOverviewTodoAddedRequested>(_onTodoAddedRequested);
     // on<TodosOverviewTodosSearchChanged>(_onSearchChanged);
   }
 
@@ -92,6 +93,50 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       await _todosRepository.deleteTodo(event.todo.id);
     } catch (e) {
       emit(TodosOverviewFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onTodoAddedRequested(
+    TodosOverviewTodoAddedRequested event,
+    Emitter<TodosOverviewState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! TodosOverviewLoaded) {
+      return;
+    }
+
+    emit(
+      TodosOverviewLoaded(
+        todos: currentState.todos,
+        filter: currentState.filter,
+        searchQuery: currentState.searchQuery,
+        actionStatus: TodosOverviewActionStatus.addInProgress,
+      ),
+    );
+
+    try {
+      final createdTodo = await _todosRepository.createTodo(event.title);
+      final updatedTodos = List<Todo>.from(currentState.todos)
+        ..insert(0, createdTodo);
+      visibleTodos = updatedTodos;
+      emit(
+        TodosOverviewLoaded(
+          todos: updatedTodos,
+          filter: currentState.filter,
+          searchQuery: currentState.searchQuery,
+          actionStatus: TodosOverviewActionStatus.addSuccess,
+        ),
+      );
+    } catch (e) {
+      emit(
+        TodosOverviewLoaded(
+          todos: currentState.todos,
+          filter: currentState.filter,
+          searchQuery: currentState.searchQuery,
+          actionStatus: TodosOverviewActionStatus.addFailure,
+          actionError: e.toString(),
+        ),
+      );
     }
   }
 }

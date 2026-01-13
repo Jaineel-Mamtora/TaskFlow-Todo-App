@@ -37,3 +37,12 @@ final class TodosOverviewTodoDeleted extends TodosOverviewEvent {
   @override
   List<Object> get props => [todo];
 }
+
+final class TodosOverviewTodoAddedRequested extends TodosOverviewEvent {
+  const TodosOverviewTodoAddedRequested(this.title);
+
+  final String title;
+
+  @override
+  List<Object> get props => [title];
+}

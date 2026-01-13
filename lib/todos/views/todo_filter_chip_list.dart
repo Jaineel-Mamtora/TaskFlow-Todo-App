@@ -32,6 +32,9 @@ class TodoFilterChipList extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
+                    checkmarkColor: Theme.of(
+                      context,
+                    ).colorScheme.onPrimaryContainer,
                     label: Text(filter.label),
                     selected: isSelected,
                     onSelected: (_) {

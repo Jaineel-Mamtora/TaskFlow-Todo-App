@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:taskflow_todo_app/todos/views/add_todo_bottom_sheet.dart';
 import 'package:taskflow_todo_app/todos/views/todos_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -13,8 +14,21 @@ class HomePage extends StatelessWidget {
       ),
       body: const TodosPage(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: implement
+        onPressed: () async {
+          final added = await showModalBottomSheet<bool>(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            builder: (sheetContext) {
+              return const AddTodoBottomSheet();
+            },
+          );
+
+          if (added == true && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Task added')),
+            );
+          }
         },
         child: const Icon(
           Icons.add_rounded,
