@@ -1,4 +1,4 @@
-part of 'todos_overview_bloc.dart';
+part of 'todos_bloc.dart';
 
 sealed class TodosOverviewState extends Equatable {
   const TodosOverviewState();
@@ -13,6 +13,10 @@ final class TodosOverviewInitial extends TodosOverviewState {
 
 final class TodosOverviewLoading extends TodosOverviewState {
   const TodosOverviewLoading();
+}
+
+final class TodosOverviewListLoading extends TodosOverviewState {
+  const TodosOverviewListLoading();
 }
 
 final class TodosOverviewLoaded extends TodosOverviewState {

@@ -37,6 +37,44 @@ class JsonPlaceholderApiClient {
         .toList();
   }
 
+  Future<List<Todo>> getFilteredTodos(String filterName) async {
+    var filter = <String, dynamic>{};
+
+    switch (filterName.trim().toLowerCase()) {
+      case 'completed':
+        filter = {'completed': 'true'};
+        break;
+      case 'active':
+        filter = {'completed': 'false'};
+        break;
+      default:
+        filter = {};
+    }
+
+    final todosResponse = await _httpClient.get(
+      Uri.https(
+        _baseUrl,
+        '/todos',
+        filter,
+      ),
+      headers: {'Content-type': 'application/json'},
+    );
+
+    if (todosResponse.statusCode != 200) {
+      throw const TodosRequestFailure(
+        'Server is down. Please try after sometime.',
+      );
+    }
+
+    final todosJson = jsonDecode(todosResponse.body) as List;
+
+    if (todosJson.isEmpty) throw const TodosNotFoundFailure('No todos found!');
+
+    return todosJson
+        .map((todo) => Todo.fromJson(todo as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<Todo> addTodo(Todo todo) async {
     final todosResponse = await _httpClient.post(
       getTodosRequest(),

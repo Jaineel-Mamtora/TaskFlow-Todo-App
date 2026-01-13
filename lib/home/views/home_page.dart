@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:taskflow_todo_app/todo_overview/views/todo_overview_page.dart';
+import 'package:taskflow_todo_app/todos/views/todos_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('TaskFlow'),
       ),
-      body: const TodoOverviewPage(),
+      body: const TodosPage(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // TODO: implement

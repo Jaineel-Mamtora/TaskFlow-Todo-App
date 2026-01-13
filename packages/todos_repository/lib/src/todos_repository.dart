@@ -9,6 +9,9 @@ class TodosRepository {
 
   Future<List<Todo>> getTodos() async => await _todoApiClient.getTodos();
 
+  Future<List<Todo>> getFilteredTodos(String filterName) async =>
+      await _todoApiClient.getFilteredTodos(filterName);
+
   Future<void> saveTodo(Todo todo) async => await _todoApiClient.addTodo(todo);
 
   Future<Todo> updateTodo(Todo todo) async =>

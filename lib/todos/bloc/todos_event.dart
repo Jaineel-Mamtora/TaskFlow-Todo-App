@@ -1,14 +1,4 @@
-part of 'todos_overview_bloc.dart';
-
-enum TodoFilter { all, active, completed }
-
-extension TodoFilterX on TodoFilter {
-  String get label => switch (this) {
-    TodoFilter.all => 'All',
-    TodoFilter.active => 'Active',
-    TodoFilter.completed => 'Completed',
-  };
-}
+part of 'todos_bloc.dart';
 
 sealed class TodosOverviewEvent extends Equatable {
   const TodosOverviewEvent();
