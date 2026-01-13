@@ -1,6 +1,14 @@
 part of 'todos_bloc.dart';
 
-enum TodosOverviewActionStatus { idle, addInProgress, addSuccess, addFailure }
+enum TodosOverviewActionStatus {
+  idle,
+  addInProgress,
+  addSuccess,
+  addFailure,
+  updateInProgress,
+  updateSuccess,
+  updateFailure,
+}
 
 sealed class TodosOverviewState extends Equatable {
   const TodosOverviewState();
@@ -28,6 +36,7 @@ final class TodosOverviewLoaded extends TodosOverviewState {
     this.searchQuery = '',
     this.actionStatus = TodosOverviewActionStatus.idle,
     this.actionError,
+    this.actionTodoId,
     this.updatingTodoIds = const <int>{},
     this.completionError,
   });
@@ -39,6 +48,7 @@ final class TodosOverviewLoaded extends TodosOverviewState {
   final String searchQuery;
   final TodosOverviewActionStatus actionStatus;
   final String? actionError;
+  final int? actionTodoId;
   final Set<int> updatingTodoIds;
   final String? completionError;
 
@@ -48,6 +58,7 @@ final class TodosOverviewLoaded extends TodosOverviewState {
     String? searchQuery,
     TodosOverviewActionStatus? actionStatus,
     Object? actionError = _sentinel,
+    Object? actionTodoId = _sentinel,
     Set<int>? updatingTodoIds,
     Object? completionError = _sentinel,
   }) {
@@ -59,6 +70,9 @@ final class TodosOverviewLoaded extends TodosOverviewState {
       actionError: actionError == _sentinel
           ? this.actionError
           : actionError as String?,
+      actionTodoId: actionTodoId == _sentinel
+          ? this.actionTodoId
+          : actionTodoId as int?,
       updatingTodoIds: updatingTodoIds ?? this.updatingTodoIds,
       completionError: completionError == _sentinel
           ? this.completionError
@@ -73,6 +87,7 @@ final class TodosOverviewLoaded extends TodosOverviewState {
     searchQuery,
     actionStatus,
     actionError,
+    actionTodoId,
     updatingTodoIds,
     completionError,
   ];

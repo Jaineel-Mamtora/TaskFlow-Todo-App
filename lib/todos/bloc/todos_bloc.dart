@@ -17,6 +17,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
     on<TodosOverviewTodosFilterChanged>(_onFilterChanged);
     on<TodosOverviewTodoDeleted>(_onTodoDeleted);
     on<TodosOverviewTodoAddedRequested>(_onTodoAddedRequested);
+    on<TodosOverviewTodoUpdatedRequested>(_onTodoUpdatedRequested);
     on<TodosOverviewTodoCompletionToggled>(_onTodoCompletionToggled);
     // on<TodosOverviewTodosSearchChanged>(_onSearchChanged);
   }
@@ -106,6 +107,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       currentState.copyWith(
         actionStatus: TodosOverviewActionStatus.addInProgress,
         actionError: null,
+        actionTodoId: null,
       ),
     );
 
@@ -119,6 +121,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
           todos: updatedTodos,
           actionStatus: TodosOverviewActionStatus.addSuccess,
           actionError: null,
+          actionTodoId: null,
         ),
       );
     } catch (e) {
@@ -126,6 +129,52 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
         currentState.copyWith(
           actionStatus: TodosOverviewActionStatus.addFailure,
           actionError: e.toString(),
+          actionTodoId: null,
+        ),
+      );
+    }
+  }
+
+  Future<void> _onTodoUpdatedRequested(
+    TodosOverviewTodoUpdatedRequested event,
+    Emitter<TodosOverviewState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! TodosOverviewLoaded) {
+      return;
+    }
+
+    emit(
+      currentState.copyWith(
+        actionStatus: TodosOverviewActionStatus.updateInProgress,
+        actionError: null,
+        actionTodoId: event.todo.id,
+      ),
+    );
+
+    try {
+      final patchedTodo = await _todosRepository.updateTodoTitle(
+        id: event.todo.id,
+        title: event.updatedTitle,
+      );
+      final finalizedTodos = currentState.todos
+          .map((todo) => todo.id == patchedTodo.id ? patchedTodo : todo)
+          .toList();
+      visibleTodos = finalizedTodos;
+      emit(
+        currentState.copyWith(
+          todos: finalizedTodos,
+          actionStatus: TodosOverviewActionStatus.updateSuccess,
+          actionError: null,
+          actionTodoId: event.todo.id,
+        ),
+      );
+    } catch (e) {
+      emit(
+        currentState.copyWith(
+          actionStatus: TodosOverviewActionStatus.updateFailure,
+          actionError: e.toString(),
+          actionTodoId: event.todo.id,
         ),
       );
     }
@@ -140,23 +189,10 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       return;
     }
 
-    final updatedTodos = currentState.todos
-        .map(
-          (todo) => todo.id == event.todo.id
-              ? Todo(
-                  id: todo.id,
-                  title: todo.title,
-                  completed: event.completed,
-                )
-              : todo,
-        )
-        .toList();
     final updatingIds = Set<int>.from(currentState.updatingTodoIds)
       ..add(event.todo.id);
-    visibleTodos = updatedTodos;
     emit(
       currentState.copyWith(
-        todos: updatedTodos,
         updatingTodoIds: updatingIds,
       ),
     );
@@ -166,7 +202,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
         id: event.todo.id,
         completed: event.completed,
       );
-      final finalizedTodos = updatedTodos
+      final finalizedTodos = currentState.todos
           .map((todo) => todo.id == patchedTodo.id ? patchedTodo : todo)
           .toList();
       final updatedIds = Set<int>.from(updatingIds)..remove(event.todo.id);
@@ -179,22 +215,9 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
         ),
       );
     } catch (e) {
-      final revertedTodos = updatedTodos
-          .map(
-            (todo) => todo.id == event.todo.id
-                ? Todo(
-                    id: todo.id,
-                    title: todo.title,
-                    completed: !event.completed,
-                  )
-                : todo,
-          )
-          .toList();
       final updatedIds = Set<int>.from(updatingIds)..remove(event.todo.id);
-      visibleTodos = revertedTodos;
       emit(
         currentState.copyWith(
-          todos: revertedTodos,
           updatingTodoIds: updatedIds,
           completionError: e.toString(),
         ),

@@ -36,6 +36,14 @@ class TodosRepository {
     );
   }
 
+  Future<Todo> updateTodoTitle({
+    required int id,
+    required String title,
+  }) async => await _todoApiClient.updateTodoTitle(
+    id: id,
+    title: title,
+  );
+
   Future<void> deleteTodo(int todoId) async =>
       await _todoApiClient.deleteTodo(todoId);
 }

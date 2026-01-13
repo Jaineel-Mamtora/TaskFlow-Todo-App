@@ -15,14 +15,7 @@ class HomePage extends StatelessWidget {
       body: const TodosPage(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final added = await showModalBottomSheet<bool>(
-            context: context,
-            isScrollControlled: true,
-            useSafeArea: true,
-            builder: (sheetContext) {
-              return const AddTodoBottomSheet();
-            },
-          );
+          final added = await showAddTodoBottomSheet(context);
 
           if (added == true && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

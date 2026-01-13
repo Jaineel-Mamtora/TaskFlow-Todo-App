@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todos_repository/todos_repository.dart';
 
 import 'package:taskflow_todo_app/todos/bloc/todos_bloc.dart';
+import 'package:taskflow_todo_app/todos/views/add_todo_bottom_sheet.dart';
 
 class TodoDismissibleTile extends StatelessWidget {
   const TodoDismissibleTile({
@@ -93,11 +94,19 @@ class TodoDismissibleTile extends StatelessWidget {
               },
         title: Text(
           todo.title,
+          maxLines: null,
+          softWrap: true,
           style: TextStyle(
             color: todo.completed
                 ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
                 : theme.colorScheme.onSurface,
           ),
+        ),
+        secondary: IconButton(
+          icon: const Icon(Icons.edit_outlined),
+          onPressed: () {
+            showAddTodoBottomSheet(context, todo: todo);
+          },
         ),
         controlAffinity: ListTileControlAffinity.leading,
         tileColor: theme.colorScheme.surfaceContainer,

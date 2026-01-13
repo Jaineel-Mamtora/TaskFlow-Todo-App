@@ -142,6 +142,29 @@ class JsonPlaceholderApiClient {
     return Todo.fromJson(todoJson as Map<String, dynamic>);
   }
 
+  Future<Todo> updateTodoTitle({
+    required int id,
+    required String title,
+  }) async {
+    final todosResponse = await _httpClient.patch(
+      getTodosRequest('/todos/$id'),
+      body: jsonEncode({'title': title}),
+      headers: {'Content-type': 'application/json'},
+    );
+
+    if (todosResponse.statusCode != 200) {
+      throw const TodoUpdationFailure('Unable to update todo.');
+    }
+
+    final todoJson = jsonDecode(todosResponse.body) as Map;
+
+    if (!todoJson.containsKey('id')) {
+      throw const TodoUpdationFailure('Unable to update todo.');
+    }
+
+    return Todo.fromJson(todoJson as Map<String, dynamic>);
+  }
+
   Future<void> deleteTodo(int todoId) async {
     final todosResponse = await _httpClient.delete(
       getTodosRequest('/todos/$todoId'),
