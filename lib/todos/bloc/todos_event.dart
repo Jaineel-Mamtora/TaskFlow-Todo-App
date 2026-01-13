@@ -28,3 +28,12 @@ final class TodosOverviewTodosSearchChanged extends TodosOverviewEvent {
   @override
   List<Object> get props => [query];
 }
+
+final class TodosOverviewTodoDeleted extends TodosOverviewEvent {
+  const TodosOverviewTodoDeleted(this.todo);
+
+  final Todo todo;
+
+  @override
+  List<Object> get props => [todo];
+}

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:todos_repository/todos_repository.dart';
 
+import 'package:taskflow_todo_app/todos/views/todo_dismissible_tile.dart';
+
 class TodoSliverList extends StatelessWidget {
   const TodoSliverList({
     required this.todos,
@@ -12,7 +14,6 @@ class TodoSliverList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
@@ -22,13 +23,8 @@ class TodoSliverList extends StatelessWidget {
             return const SizedBox(height: 12.0);
           }
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: ListTile(
-              key: ValueKey(todos[itemIndex].id),
-              title: Text(todos[itemIndex].title),
-              tileColor: theme.colorScheme.surfaceContainer,
-            ),
+          return TodoDismissibleTile(
+            todo: todos[itemIndex],
           );
         },
         childCount: todos.isEmpty ? 0 : todos.length * 2 - 1,

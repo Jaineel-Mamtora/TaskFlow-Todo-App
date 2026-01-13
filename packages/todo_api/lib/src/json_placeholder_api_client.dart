@@ -119,7 +119,7 @@ class JsonPlaceholderApiClient {
     return Todo.fromJson(todoJson as Map<String, dynamic>);
   }
 
-  Future<void> deleteTodo(String todoId) async {
+  Future<void> deleteTodo(int todoId) async {
     final todosResponse = await _httpClient.delete(
       getTodosRequest('/todos/$todoId'),
       headers: {'Content-type': 'application/json'},

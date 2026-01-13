@@ -29,43 +29,50 @@ class TodoOverviewView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<TodosOverviewBloc, TodosOverviewState>(
       builder: (context, state) {
-        if (context.read<TodosOverviewBloc>().visibleTodos == null &&
-            (state is TodosOverviewLoading || state is TodosOverviewInitial)) {
+        if (state is TodosOverviewLoading || state is TodosOverviewInitial) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
 
         if (state is TodosOverviewListLoading || state is TodosOverviewLoaded) {
-          return CustomScrollView(
-            slivers: [
-              const SliverToBoxAdapter(
-                child: TodoSearchField(),
-              ),
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: CustomScrollView(
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: TodoSearchField(),
+                ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 12),
+                ),
 
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
+                const SliverToBoxAdapter(
                   child: TodoFilterChipList(),
                 ),
-              ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 12),
+                ),
 
-              if (state is TodosOverviewListLoading)
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: CircularProgressIndicator(),
+                if (state is TodosOverviewListLoading)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else
+                  TodoSliverList(
+                    todos: (state as TodosOverviewLoaded).todos,
                   ),
-                )
-              else
-                TodoSliverList(todos: (state as TodosOverviewLoaded).todos),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 120)),
-            ],
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 120),
+                ),
+              ],
+            ),
           );
         }
         if (state is TodosOverviewFailure) {

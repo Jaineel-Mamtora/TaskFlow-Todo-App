@@ -15,6 +15,7 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       super(const TodosOverviewInitial()) {
     on<TodosOverviewRequested>(_onRequested);
     on<TodosOverviewTodosFilterChanged>(_onFilterChanged);
+    on<TodosOverviewTodoDeleted>(_onTodoDeleted);
     // on<TodosOverviewTodosSearchChanged>(_onSearchChanged);
   }
 
@@ -63,6 +64,33 @@ class TodosOverviewBloc extends Bloc<TodosOverviewEvent, TodosOverviewState> {
       );
     } catch (e) {
       print(e.toString());
+      emit(TodosOverviewFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onTodoDeleted(
+    TodosOverviewTodoDeleted event,
+    Emitter<TodosOverviewState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! TodosOverviewLoaded) {
+      return;
+    }
+
+    final updatedTodos = List<Todo>.from(currentState.todos)
+      ..removeWhere((todo) => todo.id == event.todo.id);
+    visibleTodos = updatedTodos;
+    emit(
+      TodosOverviewLoaded(
+        todos: updatedTodos,
+        filter: currentState.filter,
+        searchQuery: currentState.searchQuery,
+      ),
+    );
+
+    try {
+      await _todosRepository.deleteTodo(event.todo.id);
+    } catch (e) {
       emit(TodosOverviewFailure(e.toString()));
     }
   }
